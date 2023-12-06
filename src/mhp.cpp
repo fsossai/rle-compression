@@ -46,9 +46,13 @@ Path nearest_neighbor(DataFrame& dataframe, int start_node) {
   // Creating the path.
   // From now on, 'nodes-i' can be seen as the number of remaining
   // nodes to selected.
-  auto description = "building path";
-  printf("Nearest neighbor: %s 1/%zu (%.1f%%)", 
-      description, nnodes, 100.f*1/nnodes);
+
+  auto update = [&](int i) {
+    printf("\rNearest neighbor: building path %i/%zu (%.1f%%) elapsed=%.1f s",
+        i+1, nnodes, 100.f*(i+1)/nnodes, timer.total()/1000.f);
+    fflush(stdout);
+  };
+  update(0);
 
   int k = 0; // print skip tracker
   //print_skip = 1;
@@ -65,16 +69,14 @@ Path nearest_neighbor(DataFrame& dataframe, int start_node) {
     }
 
     if (timer.uplap()) {
-      printf("\rNearest neighbor: %s %i/%zu (%.1f%%) elapsed=%.1f s",
-          description, i+1, nnodes, 100.f*(i+1)/nnodes, timer.total()/1000.f);
-      fflush(stdout);
+      update(i);
     }
 
     path.add(available[nearest]);
     swap(available, nearest, nnodes-i-1);
   }
-  printf("\rNearest neighbor: %s %zu/%zu (%.1f%%) elapsed=%.1f s\n",
-      description, nnodes, nnodes, 100.f, timer.total()/1000.f);
+  update(nnodes-1);
+  printf("\n");
 
   return path;
 }
@@ -381,9 +383,13 @@ bool refine_2opt(Path& path, int time_limit) {
   int delta;
   bool finished = true;
 
-  printf("2-opt refinement: cost=%i uncrossed=0 elapsed=%.1f s",
-      path_cost, 0.f);
-  fflush(stdout);
+  auto update = [&]() {
+    double improvement = 1.0 - ((double)path_cost / initial_cost);
+    printf("\r2-opt refinement: cost=%i (%.2f%%) uncrossed=%i elapsed=%.1f s",
+       path_cost, -improvement*100, uncrossed, limit_timer.total()/1000.f);
+    fflush(stdout);
+  };
+  update();
 
   do {
     improvable = 0;
@@ -406,16 +412,15 @@ bool refine_2opt(Path& path, int time_limit) {
 
         }
       }
-        if (print_timer.uplap()) {
-          double improvement = 1.0 - ((double)path_cost / initial_cost);
-          printf("\r2-opt refinement: cost=%i (%.2f%%) uncrossed=%i elapsed=%.1f s",
-             path_cost, -improvement*100, uncrossed, limit_timer.total()/1000.f);
-          fflush(stdout);
-        }
-        if (limit_timer.up()) {
-          printf("\n2-opt refinement: timed out");
-          goto end;
-        }
+      if (print_timer.uplap()) {
+        update();
+      }
+      if (limit_timer.up()) {
+        update();
+        printf("\n2-opt refinement: timed out");
+        finished = false;
+        goto end;
+      }
     }
   } while (improvable);
 end:
@@ -424,13 +429,12 @@ end:
 }
 
 bool refine_2opt_exhaustive(Path& path, int time_limit) {
-  int nnodes = path.size();
-  int path_cost = path.cost();
+  const int nnodes = path.size();
+  int initial_cost = path.cost();
+  int path_cost = initial_cost;
 
-  const int print_interval = 200.f; // [ms]
-  const int print_skip = 100'000;
-  auto print_timer_start = high_resolution_clock::now();
-  auto global_timer_start = high_resolution_clock::now();
+  auto print_timer = LTimer(200); // [ms]
+  auto limit_timer = LTimer(time_limit);
 
   int improvable;
   int uncrossed = 0;
@@ -438,11 +442,14 @@ bool refine_2opt_exhaustive(Path& path, int time_limit) {
   int best_i, best_j;
   bool finished = true;
 
-  printf("2-opt refinement (e): cost=%i uncrossed=0 elapsed=%.1f s",
-      path_cost, 0.f);
-  fflush(stdout);
+  auto update = [&]() {
+    double improvement = 1.0 - ((double)path_cost / initial_cost);
+    printf("\r2-opt refinement (e): cost=%i (%.2f%%) uncrossed=%i elapsed=%.1f s",
+       path_cost, -improvement*100, uncrossed, limit_timer.total()/1000.f);
+    fflush(stdout);
+  };
+  update();
 
-  int skip_tracker = 0; // print skip tracker
   do {
     improvable = 0;
     best_delta = 0;
@@ -460,23 +467,15 @@ bool refine_2opt_exhaustive(Path& path, int time_limit) {
           best_j = j;
         }
 
-        // handling prints
-        if (skip_tracker++ % print_skip == 0) {
-          auto now = high_resolution_clock::now();
-          auto elapsed = duration_cast<milliseconds>(
-              now - global_timer_start).count();
-          auto interval = duration_cast<milliseconds>(
-              now - print_timer_start).count();
-          if (interval > print_interval) { 
-            printf("\r2-opt refinement (e): cost=%i uncrossed=%i elapsed=%.1f s",
-                   path_cost, uncrossed, elapsed/1000.f);
-            fflush(stdout);
-            print_timer_start = high_resolution_clock::now();
-          }
-          if (elapsed >= time_limit) {
-            goto time_out;
-          }
-        }
+      }
+      if (print_timer.uplap()) {
+        update();
+      }
+      if (limit_timer.up()) {
+        update();
+        printf("\n2-opt refinement (e): timed out");
+        finished = false;
+        goto end;
       }
     }
     if (best_delta < 0) {
@@ -489,9 +488,6 @@ bool refine_2opt_exhaustive(Path& path, int time_limit) {
     }
   } while (improvable);
   goto end;
-time_out:
-  finished = false;
-  printf("\n2-opt refinement (e): timed out");
 end:
   printf("\n");
   return finished;
