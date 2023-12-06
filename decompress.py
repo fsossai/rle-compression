@@ -87,7 +87,7 @@ def print_info(info):
     input_size = os.stat(info["input"]).st_size
     output_size = os.stat(info["output"]).st_size
     mebi = lambda x: x/(1024**2)
-    fslog.open("Summary info")
+    fslog.open("Summary")
     fslog.log(f"Input file name               : {info['input']}")
     fslog.log(f"Output file name              : {info['output']}")
     fslog.log(f"Input file size               : {mebi(input_size):.1f}M")
