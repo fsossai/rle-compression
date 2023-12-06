@@ -102,9 +102,13 @@ Path multi_list(DataFrame& dataframe, matrix_t& L) {
     check[i] = i;
   }
 
-  auto description = "building path";
-  printf("Multi list: %s 1/%zu (%.1f%%)", 
-      description, nnodes, 100.f*1/nnodes);
+  auto update = [&]() {
+    const auto i = path.size();
+    printf("\rMulti list: building path %zu/%zu (%.1f%%) elapsed=%.1f s",
+        i, nnodes, 100.f*i/nnodes, timer.total()/1000.f);
+    fflush(stdout);
+  };
+  update();
 
   while (L[0].size() > 1) {
     candidate_idx.clear();
@@ -156,15 +160,11 @@ Path multi_list(DataFrame& dataframe, matrix_t& L) {
     n = min_i;
 
     if (timer.uplap()) {
-      const auto n = path.size();
-      printf("\rMulti list: %s %zu/%zu (%.1f%%) elapsed=%.1f s",
-          description, n, nnodes, 100.f*(n+1)/nnodes, timer.total()/1000.f);
-      fflush(stdout);
+      update();
     }
-
   }
-  printf("\rMulti list: %s %zu/%zu (%.1f%%) elapsed=%.1f s\n",
-      description, path.size(), nnodes, 100.f, timer.total()/1000.f);
+  update();
+  printf("\n");
 
   return path;
 }
