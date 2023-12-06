@@ -88,10 +88,14 @@ def print_info(info):
     input_size = os.stat(info["input"]).st_size
     output_size = os.stat(info["output"]).st_size
     mebi = lambda x: x/(1024**2)
-    fslog.log(f"Input file size   : {mebi(input_size):.1f}M")
-    fslog.log(f"Output file size  : {mebi(output_size):.1f}M")
-    fslog.log(f"Expansion factor  : {info['expansion']:.2f}x")
-    fslog.log(f"Elapsed time      : {info['time']:.3f} s")
+    fslog.open("Summary info")
+    fslog.log(f"Input file name               : {info['input']}")
+    fslog.log(f"Output file name              : {info['output']}")
+    fslog.log(f"Input file size               : {mebi(input_size):.1f}M")
+    fslog.log(f"Output file size              : {mebi(output_size):.1f}M")
+    fslog.log(f"Expansion factor              : {info['expansion']:.2f}x")
+    fslog.log(f"Elapsed time                  : {info['time']:.3f} s")
+    fslog.close()
 
 @horatio.section()
 def decompress(input_file, **kwargs):

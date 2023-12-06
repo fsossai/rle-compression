@@ -50,6 +50,7 @@ def export_header(df, dbname):
         f.write(header)
     return output
 
+@horatio.step()
 def factorize(df):
     fdf = df.copy()
     for col in df.columns:
@@ -58,7 +59,7 @@ def factorize(df):
 
     return fdf
 
-@horatio.step("Parsing")
+@horatio.step()
 def parse(input_file):
     ext = pathlib.Path(input_file).suffix
     if ext == ".json":
@@ -70,17 +71,17 @@ def parse(input_file):
         sys.exit(1)
     return df
 
-@horatio.section("Random (RAND)")
+@horatio.section()
 def reorder_rand(df):
     return df.sample(frac=1, random_state=1) # shuffling
 
-@horatio.section("Lexicographical (LEX)")
+@horatio.section()
 def reorder_lex(df):
     order = df.nunique(dropna=False).sort_values().index.to_list()
     rdf = df.sort_values(by=order)
     return rdf
 
-@horatio.section("Nearest Neighbor (NN)")
+@horatio.section()
 def reorder_nn(df):
     mktemp = subprocess.run("mktemp", stdout=subprocess.PIPE, text=True)
     fact_file = mktemp.stdout.strip()
@@ -93,7 +94,7 @@ def reorder_nn(df):
     rdf = df.iloc[order]
     return rdf
 
-@horatio.section("Variable Neighborhood Search (VNS)")
+@horatio.section()
 def reorder_vns(df, time_limit):
     mktemp = subprocess.run("mktemp", stdout=subprocess.PIPE, text=True)
     fact_file = mktemp.stdout.strip()
@@ -106,7 +107,7 @@ def reorder_vns(df, time_limit):
     rdf = df.iloc[order]
     return rdf
 
-@horatio.section("Lists initialization")
+@horatio.section()
 def build_lists(df, output_file):
     order = df.nunique(dropna=False).sort_values().index.to_list()
     rdf = df.sort_values(by=order)
@@ -116,7 +117,7 @@ def build_lists(df, output_file):
     ldf.T.to_csv(output_file, header=False, index=False, sep="\t")
     return ldf
 
-@horatio.section("Multi Lists (ML)")
+@horatio.section()
 def reorder_ml(df):
     mktemp = subprocess.run("mktemp", stdout=subprocess.PIPE, text=True)
     temp_file = mktemp.stdout.strip()
@@ -132,8 +133,8 @@ def reorder_ml(df):
     order = numpy.loadtxt(output).astype("int32")
     rdf = df.iloc[order]
     return rdf
-    
-@horatio.section("Run-length encoding")
+
+@horatio.section()
 def export_dataframe(df, dbname):
     outputs = []
     for c in df:
@@ -144,7 +145,7 @@ def export_dataframe(df, dbname):
     outputs.append(header)
     return outputs
 
-@horatio.section("Archive creation")
+@horatio.section()
 def create_archive(df, output_file, **kwargs):
     default = dict()
     default["leave_columns"] = False
@@ -166,7 +167,7 @@ def create_archive(df, output_file, **kwargs):
     if not kwargs["leave_columns"]:
         os.system(f"rm {arguments}")
 
-@horatio.section("Pipeline execution")
+@horatio.section()
 def run_pipeline(pipeline, df, time_limit):
     for p in pipeline:
         p = p.lower()
@@ -207,6 +208,9 @@ def print_info(info):
     mebi = lambda x: x/(1024**2)
     kilo = lambda x: x/1000
 
+    fslog.open("Summary info")
+    fslog.log(f"Input file name               : {info['input']}")
+    fslog.log(f"Output file name              : {info['output']}")
     fslog.log(f"Input file size               : {mebi(info['input_size']):.1f}M")
     fslog.log(f"Output file size              : {mebi(info['output_size']):.1f}M")
     fslog.log(f"Number of rows                : {kilo(info['nrows']):.0f}K")
@@ -220,8 +224,9 @@ def print_info(info):
     fslog.log(f"Improvement (upper bound)     : {r_ref/r_best:.4}x")
     fslog.log(f"Compression ratio             : {info['c_ratio']:.2f}%")
     fslog.log(f"Compression time              : {info['time']:.3f} s")
+    fslog.close()
 
-@horatio.section("Compression")
+@horatio.section()
 def compress(input_file, **kwargs):
     default = dict()
     default["input"] = input_file
