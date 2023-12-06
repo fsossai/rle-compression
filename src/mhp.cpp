@@ -22,12 +22,11 @@ void swap(vector<int>& v, size_t i, size_t j) {
 
 Path nearest_neighbor(DataFrame& dataframe, int start_node) {
   auto nnodes = dataframe.size();
-  auto n_var = (nnodes * (nnodes-1LL)) / 2LL;
   auto timer = LTimer(200); // ms
   
   // 'available' lists all node that have not been inserted yet
   printf("Nearest neighbor: initialization ... ");
-  cout << flush;
+  fflush(stdout);
   vector<int> available(nnodes);
   for (size_t i = 0; i < nnodes; i++) {
     available[i] = i;
@@ -43,7 +42,6 @@ Path nearest_neighbor(DataFrame& dataframe, int start_node) {
 
   int min_cost;
   int current_cost;
-  int total_cost = 0;
 
   // Creating the path.
   // From now on, 'nodes-i' can be seen as the number of remaining
@@ -74,7 +72,6 @@ Path nearest_neighbor(DataFrame& dataframe, int start_node) {
 
     path.add(available[nearest]);
     swap(available, nearest, nnodes-i-1);
-    total_cost += min_cost;
   }
   printf("\rNearest neighbor: %s %zu/%zu (%.1f%%) elapsed=%.1f s\n",
       description, nnodes, nnodes, 100.f, timer.total()/1000.f);
@@ -86,7 +83,6 @@ Path multi_list(DataFrame& dataframe, matrix_t& L) {
   auto path = Path(dataframe);
   const auto M = L.size();
   const auto nnodes = L[0].size();
-  const int print_interval = 200.f; // [ms]
 
   int n = L[0][0];
 
@@ -96,7 +92,7 @@ Path multi_list(DataFrame& dataframe, matrix_t& L) {
   auto prev_idx = vector<int>(M);
   auto prev_it = vector<vector<int>::const_iterator>(M);
   
-  auto timer = LTimer(200); // ms
+  auto timer = LTimer(200); // [ms]
 
   const auto N = L[0].size();
   auto check = vector<int>(N);
@@ -206,10 +202,9 @@ bool refine_4opt(Path& path, int time_limit) {
   int delta;
   bool finished = true;
 
-  auto timer_start = high_resolution_clock::now();
   printf("4-opt refinement: cost=%i uncrossed=0 elapsed=%.1f s",
       path_cost, 0.f);
-  cout << flush;
+  fflush(stdout);
 
   int skip_tracker = 0; // print skip tracker
   do {
@@ -259,7 +254,7 @@ bool refine_4opt(Path& path, int time_limit) {
           if (interval > print_interval) { 
             printf("\r4-opt refinement: cost=%i uncrossed=%i elapsed=%.1f s",
                    path_cost, uncrossed, elapsed/1000.f);
-            cout << flush;
+            fflush(stdout);
             print_timer_start = high_resolution_clock::now();
           }
           if (elapsed >= time_limit) {
@@ -297,15 +292,12 @@ bool refine_3opt(Path& path, DataFrame& dataframe, int time_limit) {
   int improvable;
   int uncrossed = 0;
   int delta;
-  int start;
-  int current;
   bool finished = true;
   unsigned int skip_tracker = 0;
 
-  auto timer_start = high_resolution_clock::now();
   printf("3-opt refinement: cost=%i uncrossed=0 elapsed=%.1f s",
       path_cost, 0.f);
-  cout << flush;
+  fflush(stdout);
 
 	do
 	{
@@ -347,7 +339,7 @@ loop_from_scratch:
             if (interval > print_interval) {
               printf("\r3-opt refinement: cost=%i uncrossed=%i elapsed=%.1f s",
                      path_cost, uncrossed, elapsed/1000.f);
-              cout << flush;
+              fflush(stdout);
               print_timer_start = high_resolution_clock::now();
             }
             if (elapsed >= time_limit) {
@@ -369,9 +361,7 @@ loop_from_scratch:
 	} while (improvable);
 time_out:
   finished = false;
-  printf("\n3-opt refinement: timed out");
-end:
-  printf("\n");
+  printf("\n3-opt refinement: timed out\n");
   // converting back to the direct representation
   for (size_t i = 1; i < nnodes; i++) {
     path[i] = succ[path[i-1]];
@@ -383,7 +373,7 @@ bool refine_2opt(Path& path, int time_limit) {
   int nnodes = path.size();
   int initial_cost = path.cost();
   int path_cost = initial_cost;
-  auto print_timer = LTimer(200); // ms
+  auto print_timer = LTimer(200); // [ms]
   auto limit_timer = LTimer(time_limit);
 
   int improvable;
@@ -395,7 +385,6 @@ bool refine_2opt(Path& path, int time_limit) {
       path_cost, 0.f);
   fflush(stdout);
 
-  int skip_tracker = 0; // print skip tracker
   do {
     improvable = 0;
     for (int i = 0; i < nnodes-2; i++) {
@@ -449,10 +438,9 @@ bool refine_2opt_exhaustive(Path& path, int time_limit) {
   int best_i, best_j;
   bool finished = true;
 
-  auto timer_start = high_resolution_clock::now();
   printf("2-opt refinement (e): cost=%i uncrossed=0 elapsed=%.1f s",
       path_cost, 0.f);
-  cout << flush;
+  fflush(stdout);
 
   int skip_tracker = 0; // print skip tracker
   do {
@@ -482,7 +470,7 @@ bool refine_2opt_exhaustive(Path& path, int time_limit) {
           if (interval > print_interval) { 
             printf("\r2-opt refinement (e): cost=%i uncrossed=%i elapsed=%.1f s",
                    path_cost, uncrossed, elapsed/1000.f);
-            cout << flush;
+            fflush(stdout);
             print_timer_start = high_resolution_clock::now();
           }
           if (elapsed >= time_limit) {
@@ -511,7 +499,7 @@ end:
 
 void diversificate(Path& path, int nkicks=1) {
   printf("\rDiversification: kicks=%i ... ", nkicks);
-  cout << flush;
+  fflush(stdout);
 
   const auto nnodes = path.size();
   Path aux = path;
