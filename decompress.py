@@ -47,7 +47,6 @@ def build_dataframe(rle_files, header):
     column_names = pandas.read_csv(header).columns.tolist()
     df = dict()
     for rle_file, name in zip(rle_files, column_names):
-        #with horatio.section(f"Run-length decoding {name:20}"):
         data = undo_rle(read_file(rle_file))
         df[name] = data
     
