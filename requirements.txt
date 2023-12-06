@@ -1,11 +1,5 @@
-fslog
-horatio
-itertools
-json
 numpy
-os
 pandas
 pathlib
-subprocess
-sys
-time
+fslog
+horatio
