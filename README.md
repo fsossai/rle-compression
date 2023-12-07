@@ -100,7 +100,7 @@ Once `benchmark.py` is done and an output file `bm.csv` is produced, these metri
 by means of the following commands:
 ```
 python plot_ratio.py bm.csv
-python plot_rc_reduction.py bm.csv
+python plot_reduction.py bm.csv
 python plot_time.py bm.csv
 python plot_perfprof.py bm.csv
 ```
