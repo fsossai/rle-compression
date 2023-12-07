@@ -7,12 +7,12 @@ import numpy
 def plot(input_file):
     df = pandas.read_csv(input_file)
     r = df.pivot(columns="pipeline", index="input", values="r_out")
-    r_best = df[["input","r_best"]].drop_duplicates(ignore_index=True)
-    r = pandas.merge(r, r_best, on="input")
+    r_opt = df[["input","r_opt"]].drop_duplicates(ignore_index=True)
+    r = pandas.merge(r, r_opt, on="input")
     r["input"] = r["input"].apply(lambda x: pathlib.Path(x).name.split(".")[0])
     r = r.set_index("input")
 
-    x = (r["r_best"]/r["NONE"]).sort_values().index
+    x = (r["r_opt"]/r["NONE"]).sort_values().index
 
     def make_bar(y, name):
         plt.bar(x, y[x], label=name.upper())
@@ -30,7 +30,7 @@ def plot(input_file):
     make_bar(r["ML"]/r["NONE"], "ML")
     make_bar(r["LEX"]/r["NONE"], "LEX")
     make_bar(r["NN"]/r["NONE"], "NN")
-    make_bar(r["r_best"]/r["NONE"], "BEST")
+    make_bar(r["r_opt"]/r["NONE"], "OPT")
     plt.ylabel("Compression ratio")
     plt.legend()
     plt.show()

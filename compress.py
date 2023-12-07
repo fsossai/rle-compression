@@ -193,7 +193,7 @@ def get_info(input_file, output_file, dfi, dfo):
     info["input"] = input_file
     info["nrows"] = len(dfi)
     info["r_in"] = count_total_runs(dfi)
-    info["r_best"] = dfi.nunique(dropna=False).sum()
+    info["r_opt"] = dfi.nunique(dropna=False).sum()
     info["r_ref"] = count_total_runs(reorder_lex(dfi))
     info["r_out"] = count_total_runs(dfo)
     info["input_size"] = os.stat(input_file).st_size
@@ -203,7 +203,7 @@ def get_info(input_file, output_file, dfi, dfo):
 
 def print_info(info):
     r_in, r_out = info["r_in"], info["r_out"]
-    r_ref, r_best = info["r_ref"], info["r_best"]
+    r_ref, r_opt = info["r_ref"], info["r_opt"]
     mega = lambda x: x/(1000**2)
     mebi = lambda x: x/(1024**2)
     kilo = lambda x: x/1000
@@ -218,10 +218,10 @@ def print_info(info):
     fslog.log(f"Input runs                    : {r_in}")
     fslog.log(f"Output runs                   : {r_out}")
     fslog.log(f"Ref runs                      : {r_ref}")
-    fslog.log(f"Best runs                     : {r_best}")
+    fslog.log(f"Best runs                     : {r_opt}")
     fslog.log(f"Improvement (over input)      : {r_in/r_out:.4}x")
     fslog.log(f"Improvement (over ref)        : {r_ref/r_out:.4}x")
-    fslog.log(f"Improvement (upper bound)     : {r_ref/r_best:.4}x")
+    fslog.log(f"Improvement (upper bound)     : {r_ref/r_opt:.4}x")
     fslog.log(f"Compression ratio             : {info['c_ratio']:.2f}%")
     fslog.log(f"Compression time              : {info['time']:.3f} s")
     fslog.close()

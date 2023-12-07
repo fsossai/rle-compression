@@ -91,10 +91,10 @@ def plot_dataframe(df, **kwargs):
 
 def extract_data(input_file):
     df = pandas.read_csv(input_file)
-    r_best = df[["input","r_best"]].drop_duplicates(ignore_index=True)
+    r_opt = df[["input","r_opt"]].drop_duplicates(ignore_index=True)
     pp = df.pivot(columns="pipeline", index="input", values="r_out")
-    pp = pandas.merge(pp, r_best, on="input")
-    pp = pp.rename(columns={"r_best":"BEST"})
+    pp = pandas.merge(pp, r_opt, on="input")
+    pp = pp.rename(columns={"r_opt":"OPT"})
     which = []
     if "LEX+VNS" in pp.columns:
         which.append("LEX+VNS")
