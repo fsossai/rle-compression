@@ -110,3 +110,8 @@ performance (run counts in our case) achieved by the best method on the same dat
 
 Here are some examples obtained on a set of 10,000-row databases.
 
+<p float="center">
+  <img align="middle" src="images/ratio.png" width="48%" />
+  <img align="middle" src="images/perfprof.png" width="48%" />
+</p>
+<img src="images/reduction.png" width="100%" />
