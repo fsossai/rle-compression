@@ -12,7 +12,7 @@ def plot(input_file):
 
     methods = ["LEX","NN","ML"]
 
-    matplotlib.rcParams.update({'font.size': 16})
+    #matplotlib.rcParams.update({'font.size': 16})
     #plt.style.use("dark_background")
     r[methods].plot.bar()
     plt.xticks(rotation=30)

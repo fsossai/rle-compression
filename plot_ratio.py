@@ -17,7 +17,7 @@ def plot(input_file):
     def make_bar(y, name):
         plt.bar(x, y[x], label=name.upper())
 
-    matplotlib.rcParams.update({'font.size': 16})
+    #matplotlib.rcParams.update({'font.size': 16})
     #plt.style.use("dark_background")
     plt.figure(figsize=(10, 7))
     plt.xticks(rotation=30)

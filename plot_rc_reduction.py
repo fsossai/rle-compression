@@ -19,7 +19,7 @@ def plot(input_file):
         rcr = gmean(lex[m]) - 1
         print("{:10}{:.2f} %".format(m, rcr*100))
 
-    matplotlib.rcParams.update({'font.size': 16})
+    #matplotlib.rcParams.update({'font.size': 16})
 
     r.columns.name = ""
     #plt.style.use("dark_background")
