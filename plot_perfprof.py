@@ -67,7 +67,8 @@ def plot_dataframe(df, **kwargs):
 
     plt.yticks(ticks, tick_names)
     if not kwargs["reverse"]:
-        plt.xlim(left=1, right=kwargs["xlimit"])
+        right = min(plt.xlim()[1], kwargs["xlimit"])
+        plt.xlim(left=1)
     plt.grid(True, linewidth=0.1)
 
     if kwargs["problem_type"] == "min":
@@ -94,7 +95,20 @@ def extract_data(input_file):
     pp = df.pivot(columns="pipeline", index="input", values="r_out")
     pp = pandas.merge(pp, r_best, on="input")
     pp = pp.rename(columns={"r_best":"BEST"})
-    pp = pp[["LEX","LEX+VNS","ML+VNS","NN+VNS"]]
+    which = []
+    if "LEX+VNS" in pp.columns:
+        which.append("LEX+VNS")
+    else:
+        which.append("LEX")
+    if "NN+VNS" in pp.columns:
+        which.append("NN+VNS")
+    else:
+        which.append("NN")
+    if "ML+VNS" in pp.columns:
+        which.append("ML+VNS")
+    else:
+        which.append("ML")
+    pp = pp[which]
     return pp
      
 if __name__ == "__main__":
@@ -109,4 +123,4 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     df = extract_data(args.input)
-    plot_dataframe(df, xlimit=1.2)
+    plot_dataframe(df, xlimit=3)
