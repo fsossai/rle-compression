@@ -22,7 +22,7 @@ def plot(input_file):
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description=
-        "Plot the improvements over LEX given a benchmark result",
+        "Plot the execution time of the heuristics given a benchmark result",
         argument_default=argparse.SUPPRESS)
 
     parser.add_argument("input", metavar="INPUT", type=str,
