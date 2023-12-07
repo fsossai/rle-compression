@@ -19,13 +19,13 @@ def plot(input_file):
         rcr = gmean(lex[m]) - 1
         print("{:10}{:.2f} %".format(m, rcr*100))
 
-    #matplotlib.rcParams.update({'font.size': 16})
-
     r.columns.name = ""
+    #matplotlib.rcParams.update({'font.size': 16})
     #plt.style.use("dark_background")
     (lex[methods] - 1).plot.bar()
     plt.xticks(rotation=30)
     plt.gca().yaxis.set_major_formatter(PercentFormatter(1))
+    plt.ylabel("Run count reduction (over LEX)")
     plt.show()
 
 if __name__ == "__main__":
